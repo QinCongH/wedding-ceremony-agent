@@ -1,7 +1,13 @@
-from pydantic_settings import BaseSettings
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
+    model_config = SettingsConfigDict(
+        extra="ignore",  # 忽略 .env 中未在模型中声明的字段（如 zhipu_*/xunfei_*，供 os.getenv 使用）
+        env_file=".env",
+        env_file_encoding="utf-8",
+    )
+
     PROJECT_NAME: str = "Wedding Ceremony Agent"
     VERSION: str = "0.1.0"
     API_V1_PREFIX: str = "/api/v1"
@@ -17,9 +23,10 @@ class Settings(BaseSettings):
     AGENT_MAX_ITERATIONS: int = 10
     AGENT_TIMEOUT: int = 60
 
-    class Config:
-        env_file = ".env"
-        env_file_encoding = "utf-8"
+    # JWT 鉴权配置
+    JWT_SECRET: str = "change-me-in-prod"
+    JWT_ALGORITHM: str = "HS256"
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24  # 1 天
 
 
 settings = Settings()

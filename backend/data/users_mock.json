@@ -1,0 +1,26 @@
+[
+  {
+    "id": 1,
+    "username": "alice",
+    "password": "alice123",
+    "nickname": "爱丽丝",
+    "role": "user",
+    "created_at": "2026-07-01T10:00:00"
+  },
+  {
+    "id": 2,
+    "username": "bob",
+    "password": "bob123",
+    "nickname": "鲍勃",
+    "role": "user",
+    "created_at": "2026-07-02T11:30:00"
+  },
+  {
+    "id": 3,
+    "username": "admin",
+    "password": "admin123",
+    "nickname": "管理员",
+    "role": "admin",
+    "created_at": "2026-07-03T09:00:00"
+  }
+]
