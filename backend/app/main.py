@@ -13,6 +13,7 @@ from starlette.exceptions import HTTPException as StarletteHTTPException
 from app.core.config import settings
 from app.core.database import engine, Base
 from app.api.v1.router import api_router
+from shared.schemas.response import ApiResponse
 
 logger = logging.getLogger(__name__)
 
@@ -36,14 +37,20 @@ def create_app() -> FastAPI:
     async def http_exception_handler(request: Request, exc: StarletteHTTPException):
         return JSONResponse(
             status_code=exc.status_code,
-            content={"code": exc.status_code, "message": exc.detail, "data": None},
+            content=ApiResponse.error(
+                code=exc.status_code,
+                message=exc.detail,
+            ).model_dump(mode="json"),
         )
 
     @app.exception_handler(RequestValidationError)
     async def validation_exception_handler(request: Request, exc: RequestValidationError):
         return JSONResponse(
             status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
-            content={"code": 422, "message": "validation_error", "data": None},
+            content=ApiResponse.error(
+                code=422,
+                message="validation_error",
+            ).model_dump(mode="json"),
         )
 
     @app.exception_handler(Exception)
@@ -51,7 +58,10 @@ def create_app() -> FastAPI:
         logger.exception("Unhandled exception")
         return JSONResponse(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            content={"code": 500, "message": "internal_server_error", "data": None},
+            content=ApiResponse.error(
+                code=500,
+                message="internal_server_error",
+            ).model_dump(mode="json"),
         )
 
     app.include_router(api_router, prefix=settings.API_V1_PREFIX)

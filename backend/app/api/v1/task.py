@@ -1,13 +1,15 @@
 from fastapi import APIRouter
 
+from shared.schemas.response import ApiResponse
+
 router = APIRouter()
 
 
 @router.get("")
 async def list_tasks():
-    return {"tasks": []}
+    return ApiResponse.success(data={"tasks": []})
 
 
 @router.post("")
 async def create_task():
-    return {"message": "created"}
+    return ApiResponse.success(data={"message": "created"})

@@ -5,30 +5,33 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from app.deps import get_current_user
 from app.services.message_service import MessageService, NotFound, NotOwner
 from shared.schemas.message import MessageCreate, MessageOut
+from shared.schemas.response import ApiResponse
 from shared.schemas.user import UserInfo
 
 router = APIRouter()
 
 
-@router.post("", response_model=MessageOut, status_code=status.HTTP_201_CREATED)
+@router.post("", response_model=ApiResponse[MessageOut], status_code=status.HTTP_201_CREATED)
 async def send_message(
     req: MessageCreate,
     user: UserInfo = Depends(get_current_user),
 ):
-    return MessageService().create(
+    result = MessageService().create(
         content=req.content,
         user_id=user.id,
         session_id=req.session_id,
     )
+    return ApiResponse.success(data=result)
 
 
-@router.delete("/{message_id}", response_model=MessageOut)
+@router.delete("/{message_id}", response_model=ApiResponse[MessageOut])
 async def delete_message(
     message_id: int,
     user: UserInfo = Depends(get_current_user),
 ):
     try:
-        return MessageService().delete(message_id, user_id=user.id)
+        result = MessageService().delete(message_id, user_id=user.id)
+        return ApiResponse.success(data=result)
     except NotFound:
         raise HTTPException(status.HTTP_404_NOT_FOUND, "message_not_found")
     except NotOwner:
