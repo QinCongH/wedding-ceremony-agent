@@ -1,5 +1,7 @@
 from pydantic_settings import BaseSettings, SettingsConfigDict
-
+from dotenv import load_dotenv  
+import os  
+load_dotenv()  
 
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(
@@ -13,6 +15,7 @@ class Settings(BaseSettings):
     API_V1_PREFIX: str = "/api/v1"
 
     DATABASE_URL: str = "sqlite+aiosqlite:///./data.db"
+    MYSQL_DATABASE_URL: str = os.getenv("MYSQL_DATABASE_URL")
     REDIS_URL: str = "redis://localhost:6379/0"
 
     LLM_PROVIDER: str = "openai"

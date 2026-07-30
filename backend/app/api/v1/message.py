@@ -1,9 +1,10 @@
-"""消息模块：发送消息 / 删除消息。对应技术文档 §6.2。"""
-
 from fastapi import APIRouter, Depends, HTTPException, status
 
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from app.core.database import get_mysql_db
 from app.deps import get_current_user
-from app.services.message_service import MessageService, NotFound, NotOwner
+from app.services.message_service import MessageService, MessageNotFound, NotOwner
 from shared.schemas.message import MessageCreate, MessageOut
 from shared.schemas.response import ApiResponse
 from shared.schemas.user import UserInfo
@@ -15,12 +16,11 @@ router = APIRouter()
 async def send_message(
     req: MessageCreate,
     user: UserInfo = Depends(get_current_user),
+    db: AsyncSession = Depends(get_mysql_db),
 ):
-    result = MessageService().create(
-        content=req.content,
-        user_id=user.id,
-        session_id=req.session_id,
-    )
+    svc = MessageService(db)
+    result = await svc.create(user_id=user.id, data=req)
+    await db.commit()
     return ApiResponse.success(data=result)
 
 
@@ -28,11 +28,14 @@ async def send_message(
 async def delete_message(
     message_id: int,
     user: UserInfo = Depends(get_current_user),
+    db: AsyncSession = Depends(get_mysql_db),
 ):
+    svc = MessageService(db)
     try:
-        result = MessageService().delete(message_id, user_id=user.id)
+        result = await svc.delete(message_id, user_id=user.id)
+        await db.commit()
         return ApiResponse.success(data=result)
-    except NotFound:
+    except MessageNotFound:
         raise HTTPException(status.HTTP_404_NOT_FOUND, "message_not_found")
     except NotOwner:
         raise HTTPException(status.HTTP_403_FORBIDDEN, "cannot_delete_others_message")

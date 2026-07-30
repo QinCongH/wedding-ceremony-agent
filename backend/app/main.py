@@ -11,7 +11,7 @@ from fastapi.responses import JSONResponse
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from app.core.config import settings
-from app.core.database import engine, Base
+from app.core.database import engine, mysql_engine, Base
 from app.api.v1.router import api_router
 from shared.schemas.response import ApiResponse
 
@@ -20,8 +20,15 @@ logger = logging.getLogger(__name__)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    # Agent 层 SQLite 表
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
+    # 服务层 MySQL 表（连接失败时仅警告，不阻塞启动）
+    try:
+        async with mysql_engine.begin() as conn:
+            await conn.run_sync(Base.metadata.create_all)
+    except Exception as e:
+        logger.warning("MySQL connection failed, tables not created: %s", e)
     yield
 
 
