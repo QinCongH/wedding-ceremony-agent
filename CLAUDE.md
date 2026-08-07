@@ -10,7 +10,7 @@
 
 ## 配置文件
 
-默认生成：`.workbuddy/spec-dev/config.json`
+默认生成：`.spec-dev/config.json`
 
 | 配置项 | 默认值 | 说明 |
 |--------|--------|------|
